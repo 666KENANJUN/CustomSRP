@@ -24,7 +24,7 @@ namespace CustomRP.Runtime
         
         static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
 
-        public void Render(ScriptableRenderContext context, Camera camera)
+        public void Render(ScriptableRenderContext context, Camera camera, bool useDynamicBatching, bool useGPUInstancing)
         {
             this.context = context;
             this.camera = camera;
@@ -41,7 +41,7 @@ namespace CustomRP.Runtime
 
             Setup();
             // 绘制可见的几何体
-            DrawVisibleGeometry();
+            DrawVisibleGeometry(useDynamicBatching, useGPUInstancing);
             // 绘制SRP不支持的着色器类型
             DrawUnsupportedShaders();
             // 绘制Gizmos
@@ -87,7 +87,7 @@ namespace CustomRP.Runtime
         /// <summary>
         /// 绘制可见的几何体
         /// </summary>
-        private void DrawVisibleGeometry()
+        private void DrawVisibleGeometry(bool useDynamicBatching,bool useGPUInstancing)
         {
             // 遵循：不透明物体->绘制天空盒->绘制透明物体 的绘制顺序
             //      先绘制不透明物体，绘制天空盒的时候，经过深度测试，部分区域像素已经被不透明物体所占用，绘制天空盒的时候也就减少了绘制像素的数量，
@@ -99,7 +99,12 @@ namespace CustomRP.Runtime
                 criteria = SortingCriteria.CommonOpaque
             };
             // 设置渲染的Shader Pass 和排序模式
-            var drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings);
+            var drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings)
+            {
+                // 设置渲染时批处理的使用状态
+                enableDynamicBatching = useDynamicBatching,
+                enableInstancing = useGPUInstancing
+            };
             // 设置哪些类型的渲染队列可以被绘制
             var filterSettings  = new FilteringSettings(RenderQueueRange.opaque);
             

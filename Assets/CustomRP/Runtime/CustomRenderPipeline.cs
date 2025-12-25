@@ -13,11 +13,22 @@ namespace CustomRP.Runtime
     public class CustomRenderPipeline : RenderPipeline
     {
         private CameraRender renderer = new CameraRender();
+        bool useDynamicBatching , useGPUInstancing;
+
+        public CustomRenderPipeline(bool useDynamicBatching, bool useGPUInstancing, bool useSRPBatcher)
+        {
+            // 设置合批启用状态
+            this.useDynamicBatching                              = useDynamicBatching;
+            this.useGPUInstancing                                = useGPUInstancing;
+            GraphicsSettings.useScriptableRenderPipelineBatching = useSRPBatcher;
+        }
+        
+
         protected override void Render(ScriptableRenderContext context, Camera[] cameras)
         {
             foreach (var camera in cameras)
             {
-                renderer.Render(context, camera);
+                renderer.Render(context, camera, useDynamicBatching, useGPUInstancing);
             }
         }
     }
