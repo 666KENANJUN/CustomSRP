@@ -23,6 +23,9 @@ namespace CustomRP.Runtime
         };
         
         static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
+        static ShaderTagId litShaderTagId = new ShaderTagId("CustomLit");
+        
+        Lighting lighting = new Lighting();
 
         public void Render(ScriptableRenderContext context, Camera camera, bool useDynamicBatching, bool useGPUInstancing)
         {
@@ -40,6 +43,8 @@ namespace CustomRP.Runtime
             }
 
             Setup();
+            
+            lighting.Setup(context, cullingResults);
             // 绘制可见的几何体
             DrawVisibleGeometry(useDynamicBatching, useGPUInstancing);
             // 绘制SRP不支持的着色器类型
@@ -105,6 +110,8 @@ namespace CustomRP.Runtime
                 enableDynamicBatching = useDynamicBatching,
                 enableInstancing = useGPUInstancing
             };
+            // 渲染CustomLit表示的pass块
+            drawingSettings.SetShaderPassName(1, litShaderTagId);
             // 设置哪些类型的渲染队列可以被绘制
             var filterSettings  = new FilteringSettings(RenderQueueRange.opaque);
             

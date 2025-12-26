@@ -21,6 +21,8 @@ namespace CustomRP.Runtime
             this.useDynamicBatching                              = useDynamicBatching;
             this.useGPUInstancing                                = useGPUInstancing;
             GraphicsSettings.useScriptableRenderPipelineBatching = useSRPBatcher;
+            // 灯光使用线性光强
+            GraphicsSettings.lightsUseLinearIntensity          = true;
         }
         
 
