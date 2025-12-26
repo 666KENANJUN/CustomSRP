@@ -9,6 +9,8 @@ float4x4 unity_WorldToObject;
 float4 unity_LODFade;
 real4 unity_WorldTransformParams;
 
+float3 _WorldSpaceCameraPos;
+
 CBUFFER_END
 
 // 定义一个从世界空间转换到裁剪空间的矩阵

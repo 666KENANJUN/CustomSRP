@@ -14,6 +14,10 @@ Shader "CustomRP/Lit"
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst Blend", Float) = 0
         // 默认写入深度缓冲区
         [Enum(Off,0,On,1)] _ZWrite("Z Write", Float) = 1
+        
+        // 金属度和光滑度
+        _Metallic("Metallic", Range(0, 1)) = 0
+        _Smoothness("Smoothness", Range(0, 1)) = 0.5
     }
     SubShader
     {
