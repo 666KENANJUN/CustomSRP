@@ -22,12 +22,17 @@ struct BRDF
     float roughness;
 };
 // 获得给定表面的BRDF数据
-BRDF GetBRDF(Surface surface)
+BRDF GetBRDF(Surface surface, bool applyAlphaToDiffuse = false)
 {
     BRDF brdf;
     // 物体表面对光线的反射率 会受到金属度的影响，物体的金属度越高，其自身反照率越不明显，对周围环境景象的反射就越清晰。达到最大时就完全反射显示了周围的环境景象。
     float oneMinusReflectivity = OneMinusReflectivity(surface.metallic);
     brdf.diffuse = surface.color * oneMinusReflectivity;
+    // 透明度预乘
+    if (applyAlphaToDiffuse)
+    {
+        brdf.diffuse *= surface.alpha;
+    }
     brdf.specular = lerp(MIN_REFLECTIVITY, surface.color, surface.metallic);
 
     // 光滑度转为实际的粗糙度
