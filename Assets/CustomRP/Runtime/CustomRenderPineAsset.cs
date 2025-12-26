@@ -1,3 +1,4 @@
+using CustomRP.Settings;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -13,9 +14,12 @@ namespace CustomRP.Runtime
     {
         [SerializeField]
         bool useDynamicBatching = true, useGPUInstancing = true, useSRPBatcher = true;
+        // 阴影设置
+        [SerializeField] private ShadowSettings shadows = default;
+        
         protected override RenderPipeline CreatePipeline()
         {
-            return new CustomRenderPipeline(useDynamicBatching, useGPUInstancing, useSRPBatcher);
+            return new CustomRenderPipeline(useDynamicBatching, useGPUInstancing, useSRPBatcher, shadows);
         }
     }
 }

@@ -1,7 +1,13 @@
-﻿using Unity.Collections;
+﻿using CustomRP.Settings;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+//*****************************************
+//创建人：BPS
+//创建时间：2025.12.25
+//功能说明：处理光照
+//*****************************************
 namespace CustomRP.Runtime
 {
     public class Lighting
@@ -18,8 +24,6 @@ namespace CustomRP.Runtime
         // 限制最大可见平行光数量为 4
         private const int maxDirLightCount = 4;
         
-        // private static int dirLightColorId = Shader.PropertyToID("_DirectionalLightColor");
-        // private static int dirLightDirectionId = Shader.PropertyToID("_DirectionalLightDirection");
         private static int dirLightCountId = Shader.PropertyToID("_DirectionalLightCount");
         private static int dirLightColorsId = Shader.PropertyToID("_DirectionalLightColors");
         private static int dirLightDirectionsId = Shader.PropertyToID("_DirectionalLightDirections");
@@ -28,13 +32,18 @@ namespace CustomRP.Runtime
         private static Vector4[] dirLightColors = new Vector4[maxDirLightCount];
         private static Vector4[] dirLightDirections = new Vector4[maxDirLightCount];
 
-        public void Setup(ScriptableRenderContext context, CullingResults cullingResults)
+        private Shadows shadows = new Shadows();
+
+        public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings)
         {
             this.cullingResults = cullingResults;
             buffer.BeginSample(bufferName);
+            // 传递阴影数据
+            shadows.Setup(context, cullingResults, shadowSettings);
             // 发送光源数据
-            // SetupDirectionalLight();
             SetupLights();
+            
+            shadows.Render();
             
             buffer.EndSample(bufferName);
             context.ExecuteCommandBuffer(buffer);
@@ -75,6 +84,16 @@ namespace CustomRP.Runtime
             dirLightColors[index] = visibleLight.finalColor;
             // 该矩阵的第三列是光源的前向向量
             dirLightDirections[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
+            // 存储该可见光源的阴影数据
+            shadows.ReserveDirectionalShadows(visibleLight.light, index);
+        }
+        
+        /// <summary>
+        /// 释放阴影贴图RT内存
+        /// </summary>
+        public void Cleanup()
+        {
+            shadows.Cleanup();
         }
     }
 }

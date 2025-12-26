@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using CustomRP.Settings;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -14,12 +15,15 @@ namespace CustomRP.Runtime
     {
         private CameraRender renderer = new CameraRender();
         bool useDynamicBatching , useGPUInstancing;
+        ShadowSettings shadowSettings;
 
-        public CustomRenderPipeline(bool useDynamicBatching, bool useGPUInstancing, bool useSRPBatcher)
+        public CustomRenderPipeline(bool useDynamicBatching, bool useGPUInstancing, bool useSRPBatcher, ShadowSettings shadowSettings)
         {
             // 设置合批启用状态
             this.useDynamicBatching                              = useDynamicBatching;
             this.useGPUInstancing                                = useGPUInstancing;
+            this.shadowSettings                                  = shadowSettings;
+            
             GraphicsSettings.useScriptableRenderPipelineBatching = useSRPBatcher;
             // 灯光使用线性光强
             GraphicsSettings.lightsUseLinearIntensity          = true;
@@ -28,9 +32,9 @@ namespace CustomRP.Runtime
 
         protected override void Render(ScriptableRenderContext context, Camera[] cameras)
         {
-            foreach (var camera in cameras)
+            foreach (Camera camera in cameras)
             {
-                renderer.Render(context, camera, useDynamicBatching, useGPUInstancing);
+                renderer.Render(context, camera, useDynamicBatching, useGPUInstancing,shadowSettings);
             }
         }
     }

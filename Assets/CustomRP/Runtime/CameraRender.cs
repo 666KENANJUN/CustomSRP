@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using CustomRP.Settings;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -27,7 +28,7 @@ namespace CustomRP.Runtime
         
         Lighting lighting = new Lighting();
 
-        public void Render(ScriptableRenderContext context, Camera camera, bool useDynamicBatching, bool useGPUInstancing)
+        public void Render(ScriptableRenderContext context, Camera camera, bool useDynamicBatching, bool useGPUInstancing, ShadowSettings shadowSettings)
         {
             this.context = context;
             this.camera = camera;
@@ -37,20 +38,25 @@ namespace CustomRP.Runtime
             // 在Game 视图绘制的几何体也绘制到Scene视图中
             PrepareForSceneWindow();
             
-            if (!Cull())
+            if (!Cull(shadowSettings.maxDistance))
             {
                 return;
             }
-
-            Setup();
+            buffer.BeginSample(SampleName);
+            ExecuteBuffer();
             
-            lighting.Setup(context, cullingResults);
+            lighting.Setup(context, cullingResults,shadowSettings);
+            buffer.EndSample(SampleName);
+            
+            Setup();
+
             // 绘制可见的几何体
             DrawVisibleGeometry(useDynamicBatching, useGPUInstancing);
             // 绘制SRP不支持的着色器类型
             DrawUnsupportedShaders();
             // 绘制Gizmos
             DrawGizmos();
+            lighting.Cleanup();
             Submit();
         }
 
@@ -78,12 +84,13 @@ namespace CustomRP.Runtime
         /// 剔除
         /// </summary>
         /// <returns></returns>
-        bool Cull()
+        bool Cull(float maxShadowDistance)
         {
             ScriptableCullingParameters p;
             if (camera.TryGetCullingParameters(out p))
             {
-                cullingResults = context.Cull(ref p);
+                p.shadowDistance = Mathf.Min(maxShadowDistance, p.shadowDistance);
+                cullingResults   = context.Cull(ref p);
                 return true;
             }
             return false;
